@@ -1,0 +1,63 @@
+DWAPlannerROS:
+
+  max_vel_x: 0.5  # 0.55 // absolute value of maximum velocity in x direction
+  min_vel_x: -0.1 // absolute value of minimum velocity in x direction, negative value means it can move backward
+  max_vel_y: 0.0  // absolute value of maximum velocity in y direction
+  min_vel_y: 0.0   // absolute value of minimum velocity in y direction
+
+
+  max_vel_trans: 0.6 # choose slightly less than the base's capability  // absolute value of maximum translational velocity
+  min_vel_trans: 0.05  # this is the min trans velocity when there is negligible rotational velocity // absolute value of minimum translational velocity
+  trans_stopped_vel: 0.1 # translational stopped velocity (meter/sec)
+
+  # Warning!
+  #   do not set min_trans_vel to 0.0 otherwise dwa will always think translational velocities
+  #   are non-negligible and small in place rotational velocities will be created.
+
+  max_vel_theta: 1.57  # choose slightly less than the base's capability  // absolute value of maximum velocity in theta axis
+  min_vel_theta: -1.57  # this is the min angular velocity when there is negligible translational velocity // absolute value of minimum velocity in theta axis
+  theta_stopped_vel: 0.1  // stopped velocity in theta axis
+  
+  acc_lim_x: 10 # maximum is theoretically 2.0, but we   # acceleration limit in x axis (meter/sec^2)
+  acc_lim_theta: 20  # angular acceleration limit in theta axis (radian/sec^2)
+  acc_lim_y: 0.0      # diff drive robot   # acceleration limit in y axis (meter/sec^2)
+
+# Goal Tolerance Parameters
+  yaw_goal_tolerance: 0.1  # 0.05    # allowed error in yaw axis from the goal location (radians)
+  xy_goal_tolerance: 0.3  # 0.10        # allowed distance error in x,y from the goal location (meters)
+  latch_xy_goal_tolerance: false
+
+# Forward Simulation Parameters
+  sim_time: 2.5       # 1.7    # forward simulation trajectory time
+  vx_samples: 8       # 3      # number of samples to search in x axis velocity space
+  vy_samples: 1       # diff drive robot, there is only one sample   # number of samples to search in y axis velocity space
+  vtheta_samples: 20  # 20    # number of samples to search in theta axis velocity space
+
+# Trajectory Scoring Parameters
+  path_distance_bias: 30     # 32.0   - weighting for how much it should stick to the global path plan
+   # weight value for measuring how consistently the controller follows the given path
+  goal_distance_bias: 20      # 24.0   - wighting for how much it should attempt to reach its goal
+   # weight value for determining proximity to goal location and controlling speed
+  occdist_scale: 0.1           # 0.01   - weighting for how much the controller should avoid obstacles
+   # weight value for obstacle avoidance
+  forward_point_distance: 0.2 # 0.325  - how far along to place an additional scoring point
+   # distance between robot center and additional scoring point (meter)
+  stop_time_buffer: 0.2         # 0.2    - amount of time a robot must stop in before colliding for a valid traj.
+  # minimum time needed for robot to stop before collision for a valid trajectory (sec)
+  scaling_speed: 0.25           # 0.25   - absolute velocity at which to start scaling the robot's footprint
+  # absolute value of speed at which to start scaling the robot's footprint, in m/s.
+  # Before calculating the footprintCost for each point in the trajectory, the scaling factor is calculated first. If the current translational velocity is less than scaling_speed, the scaling factor is 1.0, otherwise, the scaling factor is (vmag - scaling_speed) / (max_trans_vel - scaling_speed) * max_scaling_factor + 1.0. Then, this scaling factor is used to calculate the footprintCost for each point in the trajectory.
+  max_scaling_factor: 0.2       # 0.2    - how much to scale the robot's footprint when at speed.
+  # maximum scaling factor
+# Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05  # 0.05   - how far to travel before resetting oscillation flags
+    # how far the robot must travel before resetting oscillation flags (meters)
+# Debugging
+  publish_traj_pc : true
+  publish_cost_grid_pc: true
+  global_frame_id: odom
+
+
+# Differential-drive robot configuration - necessary?
+#  holonomic_robot: false
+
