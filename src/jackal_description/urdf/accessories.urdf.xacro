@@ -121,7 +121,7 @@
     <xacro:property name="tower" value="$(optenv JACKAL_LASER_SECONDARY_TOWER 1)" />
     <xacro:property name="prefix" value="$(optenv JACKAL_LASER_SECONDARY_PREFIX ${mount})" />
     <xacro:property name="parent" value="$(optenv JACKAL_LASER_SECONDARY_PARENT ${mount}_mount)" />
-    <xacro:property name="lidar_model" value="$(optenv JACKAL_LASER_SECONDARY_MODEL lms1xx)" />
+    <xacro:property name="lidar_model" value="$(optenv JACKAL_LASER_SECONDARY_MODEL tim551)" />
     <!-- SICK LMS1xx -->
     <xacro:if value="${lidar_model == 'lms1xx'}">
       <!-- Mount Enabled -->
@@ -323,6 +323,56 @@
     </xacro:unless>
   </xacro:if>
 
+  <xacro:if value="$(optenv JACKAL_FLEA3 1)">
+    <xacro:property name="name" value="$(optenv JACKAL_FLEA3_NAME second)" />
+    <xacro:property name="tilt" value="$(optenv JACKAL_FLEA3_TILT 0.)" />
+    <xacro:property name="tower" value="$(optenv JACKAL_FLEA3_TOWER 1)" />
+    <xacro:property name="mount" value="$(optenv JACKAL_FLEA3_MOUNT second)" />
+    <xacro:property name="prefix" value="$(optenv JACKAL_FLEA3_PREFIX ${mount})" />
+    <xacro:property name="parent" value="$(optenv JACKAL_FLEA3_PARENT front_mount)" />
+    <xacro:property name="topic" value="$(optenv JACKAL_FLEA3_SECOND_Topic img_second)" />
+
+    <xacro:pointgrey_flea3 frame="${prefix}_camera" name="${name}"
+      camera_x="0.0754" camera_y="0.029" camera_z="0.029"
+      camera_mass="0.085" hfov="1.0471975512" fps="30" width="960" height="768" topic="${topic}"/>
+    <!-- "640" height="512" -->
+    <!-- Mount Enabled -->
+    <xacro:if value="${tower}">
+      <xacro:camera_mount prefix="${prefix}" tilt="${tilt}"/>
+
+      <joint name="${prefix}_camera_mount_joint" type="fixed">
+        <origin xyz="$(optenv JACKAL_FLEA3_OFFSET 0 0 0)"
+                rpy="$(optenv JACKAL_FLEA3_RPY 0 0 0)" />
+        <parent link="${parent}" />
+        <child link="${prefix}_camera_mount" />
+      </joint>
+
+      <joint name="${prefix}_camera_bracket_joint" type="fixed">
+        <origin xyz="-5.225 0 18.5" rpy="0 1.57 0" />
+        <parent link="${prefix}_camera_beam" />
+        <child link="${prefix}_camera" />
+      </joint>
+    </xacro:if>
+
+    <!-- Mount Disabled -->
+    <!-- <xacro:unless value="${tower}">
+      <link name="${prefix}_camera_base"/>
+      <joint name="${prefix}_camera_base_joint" type="fixed">
+        <origin xyz="$(optenv JACKAL_FLEA3_OFFSET 0 0 0)"
+                rpy="$(optenv JACKAL_FLEA3_RPY 0 0 0)" />
+        <parent link="${parent}" />
+        <child link="${prefix}_camera_base" />
+      </joint>
+      <joint name="${prefix}_camera_joint" type="fixed">
+        <origin xyz="0 0 0.0145"
+                rpy="0 0 0" />
+        <parent link="${prefix}_camera_base" />
+        <child link="${prefix}_camera" />
+      </joint>
+    </xacro:unless> -->
+  </xacro:if>
+
+
   <xacro:include filename="$(find jackal_description)/urdf/accessories/stereo_camera_mount.urdf.xacro" />
   <!-- If enabled, generates a pair of flea3 cameras for stereo vision with a tilt of 30 degrees. -->
   <!-- Disabled temporarily due to metapackage issue. -->
@@ -361,6 +411,7 @@
       <child link="${prefix}_right_camera" />
     </joint>
   </xacro:if>
+  
 
   <!-- If enabled, generate the bumblebee2 camera payload with a tilt of 0 degrees. -->
   <xacro:include filename="$(find pointgrey_camera_description)/urdf/pointgrey_bumblebee2.urdf.xacro" />

@@ -1,3 +1,7 @@
 # The base Jackal configuration has no accessories at all,
 # so nothing need be specified here; the defaults as given
 # in the URDF suffice to define this config.
+
+# JACKAL_URDF_EXTRAS=/home/colin/ME5413_Final_Project/src/jackal_description/urdf/custom_example.urdf.xacro
+JACKAL_LASER=1
+JACKAL_LASER_SECONDARY=1

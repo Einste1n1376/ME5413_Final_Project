@@ -1,7 +1,7 @@
 <launch>
 
   <!-- Connect the robot to a keyboard teleop controller -->
-  <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" respawn="true"/>
+  <!-- <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen" respawn="true"/> -->
 
   <!-- Run the map server -->
   <arg name="map_file" default="$(find me5413_world)/maps/my_map.yaml"/>
@@ -15,7 +15,15 @@
 
   <!-- Launch Rviz with our settings -->
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find me5413_world)/rviz/navigation.rviz" output="log" respawn="true"/>
+  <!-- 禁用IMU数据 -->
+  <node pkg="topic_tools" type="relay" name="disable_imu">
+    <remap from="input_topic" to="imu/data"/>
+    <remap from="output_topic" to="imu/data_disabled"/>
+  </node>
 
-  <node ns="me5413_world" pkg="me5413_world" type="goal_publisher_node" name="goal_publisher_node" output="screen" />
+  <!-- <node ns="me5413_world" pkg="me5413_world" type="goal_publisher_node" name="goal_publisher_node" output="screen" /> -->
+  <!-- Launch our navigation controller node -->
+  <!-- <node pkg="me5413_world" type="goal_nav_node.py" name="goal_nav_node" output="screen" /> -->
+  <node pkg="me5413_world" type="integrated_mission_controller.py" name="integrated_mission_controller" output="screen" />
 
 </launch>
