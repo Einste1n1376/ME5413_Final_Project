@@ -273,7 +273,7 @@ Implementation details:
 
 ![AfterBridge](src/me5413_world/media/after_bridge.png)
 
-## Running Process Detailed
+## Detailed Running Process
 
 1. First launch the simulation environment
 2. Use Cartographer to build the map
