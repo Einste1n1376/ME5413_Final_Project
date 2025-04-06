@@ -10,58 +10,58 @@ class NavigationController:
     def __init__(self):
         rospy.init_node('goal_nav_node', anonymous=True)
         
-        # 初始化发布者
+        # Initialize publisher
         self.goal_pub = rospy.Publisher('/move_base_simple/goal', PoseStamped, queue_size=10)
         
-        # 初始化订阅者 - 监听导航状态
+        # Initialize subscriber - monitor navigation status
         self.status_sub = rospy.Subscriber('/move_base/status', GoalStatusArray, self.status_callback)
         
-        # 导航目标点列表
+        # Navigation waypoints list
         self.goals = [
-            # 第一个目标点
+            # First waypoint
             {'x': 16.0, 'y': -22.0, 'z': 0.0, 'yaw': math.pi},
-            # 第二个目标点
+            # Second waypoint
             {'x': 8.9, 'y': -11.6, 'z': 0.0, 'yaw': 0.0}
         ]
         
-        # 当前目标点索引
+        # Current waypoint index
         self.current_goal_index = 0
         
-        # 标记导航是否完成
+        # Flag to mark if navigation is completed
         self.navigation_completed = False
         
-        # 等待节点初始化
+        # Wait for node initialization
         rospy.sleep(2)
         rospy.loginfo("Navigation controller initialized")
 
     def publish_initial_pose(self):
-        """发布初始位姿"""
+        """Publish initial pose"""
         initial_pose_pub = rospy.Publisher('/initialpose', PoseWithCovarianceStamped, queue_size=10)
-        rospy.sleep(1)  # 确保发布器初始化完成
+        rospy.sleep(1)  # Ensure the publisher is fully initialized
 
-        # 设置初始位姿
+        # Set initial pose
         initial_pose = PoseWithCovarianceStamped()
         initial_pose.header.frame_id = "map"
         initial_pose.header.stamp = rospy.Time.now()
-        initial_pose.pose.pose.position.x = 0.0  # 初始位置 x
-        initial_pose.pose.pose.position.y = 0.0  # 初始位置 y
-        initial_pose.pose.pose.position.z = 0.0  # 初始位置 z
+        initial_pose.pose.pose.position.x = 0.0  # Initial position x
+        initial_pose.pose.pose.position.y = 0.0  # Initial position y
+        initial_pose.pose.pose.position.z = 0.0  # Initial position z
 
-        yaw = 0.0  # 初始朝向（弧度）
+        yaw = 0.0  # Initial orientation (radians)
         initial_pose.pose.pose.orientation.z = math.sin(yaw / 2.0)
         initial_pose.pose.pose.orientation.w = math.cos(yaw / 2.0)
 
-        # 设置协方差矩阵
+        # Set covariance matrix
         initial_pose.pose.covariance = [0.0] * 36
-        initial_pose.pose.covariance[0] = 0.25  # x 方向的协方差
-        initial_pose.pose.covariance[7] = 0.25  # y 方向的协方差
-        initial_pose.pose.covariance[35] = 0.06853891945200942  # yaw 的协方差
+        initial_pose.pose.covariance[0] = 0.25  # x direction covariance
+        initial_pose.pose.covariance[7] = 0.25  # y direction covariance
+        initial_pose.pose.covariance[35] = 0.06853891945200942  # yaw covariance
 
         initial_pose_pub.publish(initial_pose)
         rospy.loginfo("Published initial pose")
 
     def publish_next_goal(self):
-        """发布下一个导航目标点"""
+        """Publish next navigation waypoint"""
         if self.current_goal_index >= len(self.goals):
             rospy.loginfo("All navigation goals completed")
             self.navigation_completed = True
@@ -69,7 +69,7 @@ class NavigationController:
         
         goal_data = self.goals[self.current_goal_index]
         
-        # 创建目标点消息
+        # Create waypoint message
         goal = PoseStamped()
         goal.header.frame_id = "map"  
         goal.header.stamp = rospy.Time.now()
@@ -81,41 +81,41 @@ class NavigationController:
         goal.pose.orientation.z = math.sin(yaw / 2.0)
         goal.pose.orientation.w = math.cos(yaw / 2.0)
 
-        # 发布目标点
+        # Publish waypoint
         rospy.loginfo(f"Publishing goal {self.current_goal_index + 1}: x={goal_data['x']}, y={goal_data['y']}")
         self.goal_pub.publish(goal)
         
     def status_callback(self, msg):
-        """处理导航状态反馈"""
+        """Handle navigation status feedback"""
         if not msg.status_list:
             return
             
-        # 获取最新状态
+        # Get latest status
         status = msg.status_list[-1].status
         
-        # 状态为3表示目标已到达
+        # Status 3 means goal reached
         if status == 3:  # SUCCEEDED
             rospy.loginfo(f"Reached goal {self.current_goal_index + 1}")
             
-            # 如果是最后一个目标点
+            # If this is the last waypoint
             if self.current_goal_index == len(self.goals) - 1:
                 rospy.loginfo("Reached final destination, navigation completed")
                 self.navigation_completed = True
             else:
-                # 前往下一个目标点
+                # Move to the next waypoint
                 self.current_goal_index += 1
-                rospy.sleep(2)  # 稍作等待
+                rospy.sleep(2)  # Brief wait
                 self.publish_next_goal()
                 
     def start_navigation(self):
-        """开始导航任务"""
-        # 可选：发布初始位姿
+        """Start navigation task"""
+        # Optional: publish initial pose
         # self.publish_initial_pose()
         
-        # 发布第一个目标点
+        # Publish first waypoint
         self.publish_next_goal()
         
-        # 进入主循环
+        # Enter main loop
         rate = rospy.Rate(1)  # 1Hz
         while not rospy.is_shutdown():
             if self.navigation_completed:
