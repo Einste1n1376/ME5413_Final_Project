@@ -309,8 +309,8 @@ This project implements a complete autonomous mobile robot system that includes:
 
 These functionalities together form a Jackal autonomous robot system capable of completing specified tasks in complex environments.
 
-##Acknowledge
+## Acknowledge
 
 This project is finished from **NUS ME5413 Autonomous Mobile Robotics**
 
-Many Thanks to **Professor. Marcelo** and @ NUS Advanced Robotics Centre
+Many Thanks to **Professor. Marcelo** and **@ NUS Advanced Robotics Centre**
