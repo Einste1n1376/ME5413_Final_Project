@@ -1,7 +1,10 @@
-# ME5413_Final_Project
+# ME5413_Final_Project Implementation Guide
 
-NUS ME5413 Autonomous Mobile Robotics Final Project
-> Authors: [Christina](https://github.com/ldaowen), [Ziggy](https://github.com/ziggyhuang), [Dongen](https://github.com/nuslde), and [Shuo](https://github.com/SS47816)
+This is the **NUS ME5413 Autonomous Mobile Robotics Final Project** by Group 11
+
+Please consider referring to original readme of original project provided: [Porject README Link](README_Original.md)
+
+> Authors: [Cheng Yuchao](https://github.com/Einste1n1376), [Hu Jikai](https://github.com/cuteyuki), [Xu Chunnan](https://github.com/MINITACO715), [Zhou Tianli](https://github.com/Zhou-Tianli), [Wang Hexian](https://github.com/WHX258), and [Shen Yilun](https://github.com/syl020119)
 
 ![Ubuntu 20.04](https://img.shields.io/badge/OS-Ubuntu_20.04-informational?style=flat&logo=ubuntu&logoColor=white&color=2bbc8a)
 ![ROS Noetic](https://img.shields.io/badge/Tools-ROS_Noetic-informational?style=flat&logo=ROS&logoColor=white&color=2bbc8a)
@@ -11,6 +14,10 @@ NUS ME5413 Autonomous Mobile Robotics Final Project
 ![GitHub Repo forks](https://img.shields.io/github/forks/NUS-Advanced-Robotics-Centre/ME5413_Final_Project?color=FFE333)
 
 ![cover_image](src/me5413_world/media/gz_world.png)
+
+## Project Overview
+
+This project is the final implementation for the NUS ME5413 Autonomous Mobile Robots course. It features a complete autonomous navigation and task execution system based on the Jackal robot platform in a Gazebo simulation environment.
 
 ## Dependencies
 
@@ -42,146 +49,268 @@ NUS ME5413 Autonomous Mobile Robotics Final Project
 
 ## Installation
 
-This repo is a ros workspace, containing three rospkgs:
-
-* `interactive_tools` are customized tools to interact with gazebo and your robot
-* `jackal_description` contains the modified jackal robot model descriptions
-* `me5413_world` the main pkg containing the gazebo world, and the launch files
-
-**Note:** If you are working on this project, it is encouraged to fork this repository and work on your own fork!
-
-After forking this repo to your own github:
-
 ```bash
-# Clone your own fork of this repo (assuming home here `~/`)
+# Clone the project
 cd
-git clone https://github.com/<YOUR_GITHUB_USERNAME>/ME5413_Final_Project.git
+git clone https://github.com/Einste1n1376/ME5413_Final_Project.git
 cd ME5413_Final_Project
 
 # Install all dependencies
 rosdep install --from-paths src --ignore-src -r -y
 
-# Build
+# Build the project
 catkin_make
-# Source 
+# Set up environment variables
 source devel/setup.bash
 ```
 
-To properly load the gazebo world, you will need to have the necessary model files in the `~/.gazebo/models/` directory.
+## Workflow
 
-There are two sources of models needed:
+The project tasks are divided into four main phases:
 
-* [Gazebo official models](https://github.com/osrf/gazebo_models)
-  
-  ```bash
-  # Create the destination directory
-  cd
-  mkdir -p .gazebo/models
+1. Simulation world loading
+2. Mapping
+3. Navigation task execution
+4. Evaluation and testing
 
-  # Clone the official gazebo models repo (assuming home here `~/`)
-  git clone https://github.com/osrf/gazebo_models.git
+## 1. Simulation World Loading
 
-  # Copy the models into the `~/.gazebo/models` directory
-  cp -r ~/gazebo_models/* ~/.gazebo/models
-  ```
-
-* [Our customized models](https://github.com/NUS-Advanced-Robotics-Centre/ME5413_Final_Project/tree/main/src/me5413_world/models)
-
-  ```bash
-  # Copy the customized models into the `~/.gazebo/models` directory
-  cp -r ~/ME5413_Final_Project/src/me5413_world/models/* ~/.gazebo/models
-  ```
-
-## Usage
-
-### 0. Gazebo World
-
-This command will launch the gazebo with the project world
+Load the Gazebo simulation environment with the Jackal robot:
 
 ```bash
-# Launch Gazebo World together with our robot
+# Launch the simulation environment with the robot
 roslaunch me5413_world world.launch
 ```
 
-### 1. Manual Control
+This launch file will:
+- Load the project's simulation world
+- Spawn the Jackal robot in the world
+- Load configuration information for target locations
 
-If you wish to explore the gazebo world a bit, we provide you a way to manually control the robot around:
+![Simulation World Loading](src/me5413_world/media/gazebo.png)
 
-```bash
-# Only launch the robot keyboard teleop control
-roslaunch me5413_world manual.launch
-```
+## 2. Mapping
 
-**Note:** This robot keyboard teleop control is also included in all other launch files, so you don't need to launch this when you do mapping or navigation.
-
-![rviz_manual_image](src/me5413_world/media/rviz_manual.png)
-
-### 2. Mapping
-
-After launching **Step 0**, in the second terminal:
+This project uses Cartographer for SLAM map construction:
 
 ```bash
-# Launch GMapping
+# Start Cartographer for map building
 roslaunch me5413_world mapping.launch
 ```
 
-After finishing mapping, run the following command in the thrid terminal to save the map:
+This launch file will:
+- Initialize keyboard teleoperation for robot control
+- Load the Cartographer node to process lidar data
+- Generate an occupancy grid map
+- Launch a configured RViz to visualize the mapping process in real-time
+
+![Mapping](src/me5413_world/media/mapping.png)
+
+After completing the map construction, save the map:
 
 ```bash
-# Save the map as `my_map` in the `maps/` folder
+# Save the map as my_map
 roscd me5413_world/maps/
 rosrun map_server map_saver -f my_map map:=/map
 ```
 
-![rviz_nmapping_image](src/me5413_world/media/rviz_mapping.png)
+## 3. Map Evaluation
 
-### 3. Navigation
-
-Once completed **Step 2** mapping and saved your map, quit the mapping process.
-
-Then, in the second terminal:
+Use the EVO tool to evaluate SLAM algorithm accuracy:
 
 ```bash
-# Load a map and launch AMCL localizer
+# Compare odometry with ground truth
+evo_ape bag mapping_data.bag /gazebo/ground_truth/state /odometry/filtered --align --plot
+```
+
+This command will:
+- Load recorded trajectory data
+- Compare ground truth and SLAM-estimated trajectories
+- Generate evaluation reports and visualization results
+
+![MapEvaluation](src/me5413_world/media/evo.png)
+
+## 4. Navigation Task Execution
+
+```bash
+# Load the map and start the AMCL localizer
 roslaunch me5413_world navigation.launch
 ```
 
-![rviz_navigation_image](src/me5413_world/media/rviz_navigation.png)
+This launch file will:
+- Load the previously built map
+- Start the AMCL localization system
+- Launch the MoveBase navigation functionality
+- Start a configured RViz interface
+- Disable IMU data (to prevent interference)
+- Launch the integrated mission controller node
 
-## Student Tasks
+![Navigation Task Execution](src/me5413_world/media/nav.png)
 
-### 1. Map the environment
+### 4.1 Integrated Mission Controller
 
-* You may use any SLAM algorithm you like, any type:
-  * 2D LiDAR
-  * 3D LiDAR
-  * Vision
-  * Multi-sensor
-* Verify your SLAM accuracy by comparing your odometry with the published `/gazebo/ground_truth/state` topic (`nav_msgs::Odometry`), which contains the gournd truth odometry of the robot.
-* You may want to use tools like [EVO](https://github.com/MichaelGrupp/evo) to quantitatively evaluate the performance of your SLAM algorithm.
+The main task workflow is controlled by the `integrated_mission_controller.py` script, which implements the complete task execution logic:
 
-### 2. Using your own map, navigate your robot
+1. **Navigation Phase**: Controls the robot through the first area avoiding obstacles
+   - Sets two key navigation points
+   - First point helps avoid obstacles in the first area
+   - Second point reaches the "river bank" to observe obstacle generation
 
-* We have provided you a GUI in RVIZ that allows you to click and generate/clear the random objects in the gazebo world:
-  
-  ![rviz_panel_image](src/me5413_world/media/control_panel.png)
+2. **Number Recognition Phase**: Uses the `number_identification.py` program
+   - Recognizes numbers appearing in the scene
+   - Counts frequency of each number
+   - Determines the least frequent number
+   - Publishes this number to the `/recognized_number` topic
 
-* From the starting point, move to one of the four given destination boxes at the end of the map:
-  * Count the number of occurance of each type of box (e.g. box 1, 2, 3, 4, the box numbers are randomly generated)
-  * Cross the bridge (the location of the bridge is randomly generated)
-  * Unlock the blockade on the bridge by publishing a `true` message (`std_msgs/Bool`) to the `/cmd_open_bridge` topic
-  * Dock at the destination box with the least number of occurance
+3. **Bridge Crossing Phase**: Uses the `auto_detector_controller.py` program
+   - Uses vision to recognize orange barrier buckets
+   - Determines movement direction and speed
+   - Navigates to the obstacle
+   - Publishes a message to open the bridge
+   - Removes obstacles on the bridge and crosses it
 
-## Contribution
+4. **Opposite Bank Tasks**: Uses the `after_bridge_front_recognize.py` program
+   - Publishes four new target points to help the robot reach different numbers
+   - Recognizes the number at each position
+   - Finds the location matching the previously determined "least frequent number"
+   - Navigates closer to the target number
+   - Terminates all programs after completing the task
 
-You are welcome contributing to this repo by opening a pull-request
+## Key Code Modules
 
-We are following:
+### 1. integrated_mission_controller.py
 
-* [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html),
-* [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#main),
-* [ROS C++ Style Guide](http://wiki.ros.org/CppStyleGuide)
+The integrated mission controller is responsible for coordinating and executing the overall task flow:
 
-## License
+- Implements multi-stage task management (navigation, number recognition, bridge crossing, opposite bank tasks)
+- Manages navigation waypoint publishing and status monitoring
+- Launches and monitors the execution of various functional nodes
+- Provides task status updates and failure recovery mechanisms
 
-The [ME5413_Final_Project](https://github.com/NUS-Advanced-Robotics-Centre/ME5413_Final_Project) is released under the [MIT License](https://github.com/NUS-Advanced-Robotics-Centre/ME5413_Final_Project/blob/main/LICENSE)
+How to run:
+```bash
+rosrun me5413_world integrated_mission_controller.py
+```
+
+### 2. goal_nav_node.py
+
+Navigation point management module, responsible for:
+
+- Publishing navigation waypoints
+- Listening to navigation status feedback
+- Implementing initial position setup
+- Sequential execution of multiple navigation waypoints
+
+How to run:
+```bash
+rosrun me5413_world goal_nav_node.py
+```
+
+### 3. number_identification.py
+
+Number recognition module with functions including:
+
+- Processing camera image data
+- Using image processing techniques to recognize numbers
+- Counting occurrences of each number
+- Determining and publishing the least frequent number
+
+How to run:
+```bash
+rosrun me5413_world number_identification.py
+```
+
+Implementation details:
+- Uses OpenCV for image preprocessing (contrast enhancement, noise filtering)
+- Applies contour detection to find potential number regions
+- Uses Tesseract OCR for number recognition
+- Non-maximum suppression algorithm to filter overlapping detection boxes
+
+![Number](src/me5413_world/media/number.png)
+
+### 4. auto_detector_controller.py
+
+Orange barrier bucket detection and obstacle avoidance controller:
+
+- Receives front camera image data
+- Identifies orange objects in the image (HSV color space filtering)
+- Calculates obstacle position, size, and offset information
+- Determines robot movement strategy based on obstacle conditions
+- Controls the robot to approach targets and sends bridge opening signals
+
+How to run:
+```bash
+rosrun me5413_world auto_detector_controller.py
+```
+
+Control strategy:
+- Adjusts steering angle based on obstacle position offset
+- Adjusts forward speed based on obstacle size
+- Designs special control strategies for the final approach phase
+- Implements speed control for bridge crossing mode
+
+![Bridge](src/me5413_world/media/bridge.png)
+
+### 5. after_bridge_front_recognize.py
+
+Opposite bank number recognition and approach controller:
+
+- Receives front camera image data
+- Recognizes numbers in the image
+- Compares with the target number
+- Controls the robot to approach when a matching number is found
+
+How to run:
+```bash
+rosrun me5413_world after_bridge_front_recognize.py
+```
+
+Implementation details:
+- Image preprocessing to enhance number visibility
+- Contour detection to find number regions
+- Uses history recording mechanism to improve recognition stability
+- Executes simplified approach strategy (timed control)
+
+![AfterBridge](src/me5413_world/media/after_bridge.png)
+
+## Running Process Detailed
+
+1. First launch the simulation environment
+2. Use Cartographer to build the map
+3. Start navigation.launch, which will load:
+   - Previously built map
+   - AMCL localization system
+   - MoveBase navigation system
+   - Integrated mission controller
+
+The integrated mission controller will automatically:
+- Guide the robot to complete the first phase of obstacle avoidance
+- Start number recognition after reaching the river bank
+- Begin the bridge crossing task after determining the target number
+- Control the bridge crossing process through visual recognition
+- Find and approach the target number after reaching the opposite bank
+
+## Parameter Adjustment
+
+Each module can be optimized by adjusting key parameters:
+
+- Navigation parameters: in /ME5413_Final_Project/src/jackal_navigation/params directory
+- Visual recognition parameters: HSV thresholds and detection parameters in Python scripts
+- Motion control parameters: Speed and timing settings in scripts
+
+## Summary
+
+This project implements a complete autonomous mobile robot system that includes:
+- SLAM map construction
+- Autonomous navigation
+- Visual detection and recognition
+- Motion planning and control in complex environments
+- Multi-stage task planning and execution
+
+These functionalities together form a Jackal autonomous robot system capable of completing specified tasks in complex environments.
+
+##Acknowledge
+
+This project is finished from **NUS ME5413 Autonomous Mobile Robotics**
+
+Many Thanks to **Professor. Marcelo** and @ NUS Advanced Robotics Centre
