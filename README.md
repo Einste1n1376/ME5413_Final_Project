@@ -128,7 +128,7 @@ This command will:
 - Compare ground truth and SLAM-estimated trajectories
 - Generate evaluation reports and visualization results
 
-![MapEvaluation](src/me5413_world/media/evo.png)
+![MapEvaluation](src/me5413_world/media/evo4.png)
 
 ## 4. Navigation Task Execution
 
