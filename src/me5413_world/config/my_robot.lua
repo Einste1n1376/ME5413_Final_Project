@@ -19,11 +19,13 @@ options = {
   map_builder = MAP_BUILDER,
   trajectory_builder = TRAJECTORY_BUILDER,
   map_frame = "map",
-  tracking_frame = "imu_link",
-  published_frame = "base_link",
-  odom_frame = "odom",
-  provide_odom_frame = true, --false
-  publish_frame_projected_to_2d = false,
+  tracking_frame = "base_link",
+  published_frame = "odom", -- TF from map_frame->published_frame
+  odom_frame = "odom", -- take effect when provide_odom_frame=true
+  provide_odom_frame = false, -- TF map_frame->odom_frame + odom_frame->published_frame
+  publish_frame_projected_to_2d = false, -- Kuan's setting: true
+  -- Add parameter 'publish_tracked_pose' for 'evo' plotting
+  publish_tracked_pose = true,
   use_pose_extrapolator = true,
   use_odometry = true,
   use_nav_sat = true,
@@ -44,7 +46,24 @@ options = {
 }
 
 MAP_BUILDER.use_trajectory_builder_2d = true
+
+TRAJECTORY_BUILDER_2D.submaps.num_range_data = 1000
+TRAJECTORY_BUILDER_2D.min_range = 0.2
+TRAJECTORY_BUILDER_2D.max_range = 20
+TRAJECTORY_BUILDER_2D.missing_data_ray_length = 2.
+TRAJECTORY_BUILDER_2D.use_imu_data = true
+
+-- ROS msgs batch
 TRAJECTORY_BUILDER_2D.num_accumulated_range_data = 1
 
+TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.linear_search_window = 0.1
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.angular_search_window = math.rad(35.)
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.translation_delta_cost_weight = 20.
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.rotation_delta_cost_weight = 1
+
+POSE_GRAPH.optimization_problem.huber_scale = 1e2
+POSE_GRAPH.optimize_every_n_nodes = 5
+POSE_GRAPH.constraint_builder.min_score = 0.65
 
 return options
