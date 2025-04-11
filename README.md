@@ -120,6 +120,7 @@ Use the EVO tool to evaluate SLAM algorithm accuracy:
 
 ```bash
 # Compare odometry with ground truth
+roscd me5413_world/bags/
 evo_ape bag cartographer.bag /gazebo/ground_truth/state /tf:map.base_link --align --plot
 ```
 
