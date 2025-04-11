@@ -120,7 +120,7 @@ Use the EVO tool to evaluate SLAM algorithm accuracy:
 
 ```bash
 # Compare odometry with ground truth
-evo_ape bag mapping_data.bag /gazebo/ground_truth/state /odometry/filtered --align --plot
+evo_ape bag cartographer.bag /gazebo/ground_truth/state /tf:map.base_link --align --plot
 ```
 
 This command will:
@@ -128,7 +128,9 @@ This command will:
 - Compare ground truth and SLAM-estimated trajectories
 - Generate evaluation reports and visualization results
 
-![MapEvaluation](src/me5413_world/media/evo4.png)
+![MapEvaluation](src/me5413_world/media/evo9.png)
+![MapEvaluation](src/me5413_world/media/evo8.png)
+
 
 ## 4. Navigation Task Execution
 

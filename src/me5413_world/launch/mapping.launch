@@ -25,6 +25,11 @@
   <!-- Launch Rviz with our settings -->
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find me5413_world)/rviz/mapping.rviz" output="log" respawn="true"/>
 
+  <!-- Record bag file for evo_ape evaluation -->
+  <node pkg="rosbag" type="record" name="rosbag_record" 
+        args="/gazebo/ground_truth/state /tf /tf_static /odometry/filtered -O $(find me5413_world)/bags/cartographer.bag"
+        output="screen"/>
+
 </launch>
 
 
