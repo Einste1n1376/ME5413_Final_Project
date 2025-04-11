@@ -177,7 +177,7 @@ class IntegratedMissionController:
                     self.reached_final_goal = True
                     # Critical fix: Add delay to ensure robot is fully stable before starting number identification
                     rospy.loginfo("Reached riverbank, waiting for position to stabilize...")
-                    rospy.sleep(12)  # Wait 5 seconds for robot to stabilize
+                    rospy.sleep(20)  # Wait 20 seconds for robot to stabilize
                     rospy.loginfo("Now starting number identification...")
                     self.start_number_identification()
                 else:
@@ -289,8 +289,8 @@ class IntegratedMissionController:
             
             # Listen for bridge crossing completion signal
             # In actual application, a subscriber should be added here to receive bridge crossing completion message
-            # Simplified handling: assume bridge crossing completes after 20 seconds
-            rospy.Timer(rospy.Duration(20), self.bridge_crossing_completed_callback, oneshot=True)
+            # Simplified handling: assume bridge crossing completes after 60 seconds
+            rospy.Timer(rospy.Duration(60), self.bridge_crossing_completed_callback, oneshot=True)
             
         except Exception as e:
             rospy.logerr(f"Failed to start orange cone detection node: {e}")
