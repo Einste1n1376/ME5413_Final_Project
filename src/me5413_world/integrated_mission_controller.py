@@ -28,7 +28,7 @@ class IntegratedMissionController:
             # First waypoint - avoid obstacles in the first area
             {'x': 16.0, 'y': -22.0, 'z': 0.0, 'yaw': math.pi},
             # Second waypoint - reach the "riverbank" to observe obstacles
-            {'x': 10, 'y': -11.6, 'z': 0.0, 'yaw': math.pi},
+            {'x': 12, 'y': -11.6, 'z': 0.0, 'yaw': math.pi},
         ]
         
         # After-bridge waypoints list
